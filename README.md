@@ -20,7 +20,7 @@ Paste this into your terminal and follow the instructions:
 
 Once complete, if you want to dive right in, say yes to the tutorial option, which will open [MICRO_CONFIG_DIR/plug/tojour/tojour.tutorial.md]
 
-Fuller [manual installation instructions below](#installation-requirements).
+Fuller [manual installation instructions below](#installation--requirements).
 
 ### Syntax
 
