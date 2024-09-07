@@ -1,4 +1,4 @@
-VERSION = "1.0.0"
+VERSION = "1.0.1"
 --
 -- Copyright (c) 2024, released under MIT licence
 --
@@ -21,17 +21,70 @@ function init()
     -- config.AddRuntimeFile("tojour", config.RTColorscheme, "colorschemes/tojour-default.micro")
     -- config.AddRuntimeFile("tojour", config.RTSyntax, "syntax/markdown-journal.yaml")
 
-    config.TryBindKey("Alt-R", "command:set colorscheme tojour-neon", true) 
-    config.TryBindKey("Alt-r", "command:set colorscheme tojour-default", true) 
-    
-    setupTojour(bp, false)
+    -- regex that we can jump to directly with hotkeys on cmdJumpToNextSymbol and cmdJumpToNextAltSymbol (and Prev)
+    config.RegisterCommonOption("tojour", "symbolsforjump", "^*#{1,6} .+")
+    config.RegisterCommonOption("tojour", "symbolsforaltjump", "#[A-Za-z0-9\\.$~/_-]+[A-Za-z0-9]|\\[\\[?[a-zA-Z0-9\\.$~/_\\s-]+[A-Za-z0-9]\\]?\\]|\\[[+-]{2}]")
+
+    config.MakeCommand("tojour.setupbindings", cmdSetupTojour, config.NoComplete)
+    config.MakeCommand("tojour.setupbindingsforce", cmdSetupTojourForce, config.NoComplete)
+
+    config.MakeCommand("wordcountreset", cmdResetGlobalWordcounts, config.NoComplete)
+
+    HOME_DIR = tostring(os.getenv("HOME"))
+    PLUGIN_PATH = config.ConfigDir .. "/plug/tojour"
+    HELPER_SCRIPT_PATH = config.ConfigDir .. "/plug/tojour/scripts"
+
+    -- use @today, @habit, @tomorrow to denote recurring, current and future todo items
+    config.RegisterCommonOption("tojour", "dateprefix", "@")
+    config.RegisterCommonOption("tojour", "todaystring", "today")
+    config.RegisterCommonOption("tojour", "tomorrowstring", "tomorrow")
+    config.RegisterCommonOption("tojour", "habitstring", "habit")
+    -- '@' by default prefix to denote dates
+    date_prefix = tostring(config.GetGlobalOption("tojour.dateprefix"))
+    -- '@today' by default (prefixed with default date_prefix)
+    today_string = date_prefix .. tostring(config.GetGlobalOption("tojour.todaystring"))
+    -- '@tomorrow' by default (prefixed with default date_prefix)
+    tomorrow_string = date_prefix .. tostring(config.GetGlobalOption("tojour.tomorrowstring"))
+    -- '@habit' by default (prefixed with default date_prefix)
+    habit_string = date_prefix .. tostring(config.GetGlobalOption("tojour.habitstring"))
+
+    config.RegisterCommonOption("tojour", "mdcommentprefix", "[comment]:")
+    config.RegisterCommonOption("tojour", "imageviewer", "")
+    config.RegisterCommonOption("tojour", "filebrowser", "nnn")
+    -- config.RegisterCommonOption("tojour", "notificationhelper", "/usr/bin/notify-send")
+    config.RegisterCommonOption("tojour", "notificationhelper", "")
+
+    -- Default build script does a git commit of all files
+    config.RegisterCommonOption("tojour", "buildscript", "{ command -v git > /dev/null; } && git rev-parse 2> /dev/null && { cd $(git rev-parse --show-toplevel) && git add . && git commit -m 'pre-build autocommit' ; }; python " .. HELPER_SCRIPT_PATH .. "/todobuddy.py --today --write;")
+    config.RegisterCommonOption("tojour", "autobuildtoday", true)
+
+    -- can be false, toc, index and undone
+    config.RegisterCommonOption("tojour", "alwaysopencontextpane", false)
+    config.RegisterCommonOption("tojour", "alwaysopentodayundone", true)
+    config.RegisterCommonOption("tojour", "potatomode", false)
+
+    -- remembers the width of hte mainpane
+    config.RegisterCommonOption("tojour", "mainpanewidth", 60)
+    MAIN_PANE_WIDTH_PERCENT = tonumber(config.GetGlobalOption("tojour.mainpanewidth"))
+
+    -- if devmode is enabled with TOJOUR_DEVMODE=true env variable, all devlog functions write into /tmp/luajournal.txt
+    TOJOUR_DEVMODE = os.getenv("TOJOUR_DEVMODE") == "true"
+    if TOJOUR_DEVMODE == true then
+        tojourUnitTests()
+    else
+        TOJOUR_DEVMODE = false
+    end
 end
 
 function cmdSetupTojour(bp)
-    setupTojour(bp, true)
+    setupTojourBindings(bp, false)
 end
 
-function setupTojour(bp, force_override_hotkeys)
+function cmdSetupTojourForce(bp)
+    setupTojourBindings(bp, true)
+end
+
+function setupTojourBindings(bp, force_override_hotkeys)
     if force_override_hotkeys then
         -- make backup
         local backupfile = config.ConfigDir .. "/bindings.tojour-backup." .. getDateString() .. ".json"
@@ -40,6 +93,7 @@ function setupTojour(bp, force_override_hotkeys)
             notify("Made a backup of your keybindings to " .. backupfile)
         end
     end
+
     -- These would need overriding true
     config.TryBindKey("Ctrl-v", "lua:tojour.cmdSmarterPaste", force_override_hotkeys)
     config.TryBindKey("Tab", "IndentSelection|lua:tojour.cmdPressTabAnywhereToIndent|Autocomplete", force_override_hotkeys)
@@ -47,21 +101,18 @@ function setupTojour(bp, force_override_hotkeys)
     -- config.TryBindKey("Ctrl-P", "lua:tojour.cmdBrowseJournals", false)
     config.TryBindKey("Ctrl-p", "lua:tojour.cmdBrowseOpenTabsAndJournals", force_override_hotkeys) 
     config.TryBindKey("Ctrl-o", "lua:tojour.cmdJumpToSymbols", force_override_hotkeys)
-    
+
     config.TryBindKey("Alt-d", "lua:tojour.cmdOpenTodayFile", force_override_hotkeys)
     config.TryBindKey("Alt-D", "lua:tojour.cmdBrowseDateJournals", force_override_hotkeys)
     config.TryBindKey("Alt-a", "lua:tojour.cmdJumpToTag", force_override_hotkeys)
     config.TryBindKey("Alt-f", "lua:tojour.cmdFollowInternalLink", force_override_hotkeys)
-    
+
     -- Allow right clicking to follow stuff (warning, some versions of micro don't have MousePress event)
     config.TryBindKey("MouseRight", "lua:tojour.cmdHandleMouseEvent", true)
     config.TryBindKey("Alt-MouseLeft", "lua:tojour.cmdHandleMouseEvent", true)
-    
-    -- regex that we can jump to directly with hotkeys
-    config.RegisterCommonOption("tojour", "symbolsforjump", "^*#{1,6} .+")
+
     config.TryBindKey("Alt-]", "lua:tojour.cmdJumpToNextSymbol", force_override_hotkeys)
     config.TryBindKey("Alt-[", "lua:tojour.cmdJumpToPrevSymbol", force_override_hotkeys)
-    config.RegisterCommonOption("tojour", "symbolsforaltjump", "#[A-Za-z0-9\\.$~/_-]+[A-Za-z0-9]|\\[\\[?[a-zA-Z0-9\\.$~/_\\s-]+[A-Za-z0-9]\\]?\\]|\\[[+-]{2}]")
     config.TryBindKey("Alt-}", "lua:tojour.cmdJumpToNextAltSymbol", force_override_hotkeys)
     config.TryBindKey("Alt-{", "lua:tojour.cmdJumpToPrevAltSymbol", force_override_hotkeys)
 
@@ -104,7 +155,7 @@ function setupTojour(bp, force_override_hotkeys)
 
     config.TryBindKey("Alt-,", "PreviousTab", force_override_hotkeys)
     config.TryBindKey("Alt-.", "NextTab", force_override_hotkeys)
-    
+
     config.TryBindKey("Alt-=", "lua:tojour.cmdSidepaneResizeUp", force_override_hotkeys)
     config.TryBindKey("Alt--", "lua:tojour.cmdSidepaneResizeDown", force_override_hotkeys)
 
@@ -116,11 +167,6 @@ function setupTojour(bp, force_override_hotkeys)
 
     config.TryBindKey("Alt-b", "lua:tojour.cmdRunBuildScript", force_override_hotkeys)
     config.TryBindKey("Alt-e", "lua:tojour.cmdRunFilebrowser", force_override_hotkeys)
-
-    config.MakeCommand("tojour.setupbindings", cmdSetupTojour, config.NoComplete)
-
-    -- TODO: add show wordcountnow toggle config.TryBindKey("Alt-w", "lua:tojour.cmdCountNowTODO", false)
-    config.MakeCommand("wordcountreset", cmdResetGlobalWordcounts, config.NoComplete)
     config.TryBindKey("Alt-w", "lua:tojour.cmdWordcount", force_override_hotkeys)
     config.TryBindKey("Alt-W", "lua:tojour.cmdResetGlobalWordcounts", force_override_hotkeys)
 
@@ -133,55 +179,6 @@ function setupTojour(bp, force_override_hotkeys)
 
     config.TryBindKey("Alt-q", "NextSplit", force_override_hotkeys)
     config.TryBindKey("Alt-Q", "lua:tojour.cmdCloseSidePane", force_override_hotkeys)
-
-    HOME_DIR = tostring(os.getenv("HOME"))
-    PLUGIN_PATH = config.ConfigDir .. "/plug/tojour"
-    HELPER_SCRIPT_PATH = config.ConfigDir .. "/plug/tojour/scripts"
-
-    -- use @today, @habit, @tomorrow to denote recurring, current and future todo items
-    config.RegisterCommonOption("tojour", "dateprefix", "@")
-    config.RegisterCommonOption("tojour", "todaystring", "today")
-    config.RegisterCommonOption("tojour", "tomorrowstring", "tomorrow")
-    config.RegisterCommonOption("tojour", "habitstring", "habit")
-    -- '@' by default prefix to denote dates
-    date_prefix = tostring(config.GetGlobalOption("tojour.dateprefix"))
-    -- '@today' by default (prefixed with default date_prefix)
-    today_string = date_prefix .. tostring(config.GetGlobalOption("tojour.todaystring"))
-    -- '@tomorrow' by default (prefixed with default date_prefix)
-    tomorrow_string = date_prefix .. tostring(config.GetGlobalOption("tojour.tomorrowstring"))
-    -- '@habit' by default (prefixed with default date_prefix)
-    habit_string = date_prefix .. tostring(config.GetGlobalOption("tojour.habitstring"))
-
-    config.RegisterCommonOption("tojour", "mdcommentprefix", "[comment]:")
-    
-    config.RegisterCommonOption("tojour", "imageviewer", "")
-    config.RegisterCommonOption("tojour", "filebrowser", "nnn")
-    -- config.RegisterCommonOption("tojour", "notificationhelper", "/usr/bin/notify-send")
-    config.RegisterCommonOption("tojour", "notificationhelper", "")
-
-    -- Default build script does a git commit of all files
-    config.RegisterCommonOption("tojour", "buildscript", "{ command -v git > /dev/null; } && git rev-parse 2> /dev/null && { cd $(git rev-parse --show-toplevel) && git add . && git commit -m 'pre-build autocommit' ; }; python " .. HELPER_SCRIPT_PATH .. "/todobuddy.py --today --write;")
-    -- config.RegisterCommonOption("tojour", "buildscript", "command -v git && git rev-parse && cd $(git rev-parse --show-toplevel) && git add . && git commit -m 'pre-build autocommit' || echo 'No git repo here'; python " .. helper_script_path .. "/todobuddy.py --today --write")
-    -- config.RegisterCommonOption("tojour", "buildscript",
-    --     "command -v git && git rev-parse && cd $(git rev-parse --show-toplevel) && git add . && git commit -m 'build autocommit'; todobuddy.py")
-    config.RegisterCommonOption("tojour", "autobuildtoday", true)
-    
-    -- can be false, toc, index and undone
-    config.RegisterCommonOption("tojour", "alwaysopencontextpane", false)
-    config.RegisterCommonOption("tojour", "alwaysopentodayundone", true)
-    config.RegisterCommonOption("tojour", "potatomode", false)
-
-    config.RegisterCommonOption("tojour", "mainpanewidth", 60)
-    MAIN_PANE_WIDTH_PERCENT = tonumber(config.GetGlobalOption("tojour.mainpanewidth"))
-
-    TOJOUR_DEVMODE = os.getenv("TOJOUR_DEVMODE") == "true"
-    if TOJOUR_DEVMODE == true then
-        tojourUnitTests()
-    else
-        TOJOUR_DEVMODE = false
-    end
-
-    config.TryBindKey("Alt-s", "lua:tojour.cmdGetBufferText", true)
 end
 
 

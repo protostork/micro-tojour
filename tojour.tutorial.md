@@ -10,7 +10,7 @@ If you're on board, why don't you mark the following undone todo item as done. Y
 
 But briefly, first things first: we will assume you've installed the tojour plugin and its dependencies). If not, please look at the help (`Ctrl-e` and type 'help tojour') or just run the file [your_micro_config_dir]/plug/tojour/install.sh to set this up. 
 
-If some of the default hotkeys in the tutorial are not working, you can take over the entire default tojour keyconfig by pressing `Ctrl-e` in micro and entering this command: 'tojour.setupbindings' (don't worry, it will make a backup of your existing keyboard shortcuts).
+To take over the default hotkeys from the tutorial, press `Ctrl-e` in micro and enter this command: 'tojour.setupbindings', or to potentially overwrite your custom keybindings, 'tojour.setupbindingsforce' (don't worry, it will make a backup of your existing keyboard shortcuts).
 
 ## Managing Todos
 
@@ -212,6 +212,10 @@ There are lots of amazing micro plugins by amazing developers, but these are esp
 
 - `plugin install quoter` (allows easy-insertion of surrounding quote marks)
 - `plugin install manipulator` (easily turn text to lowercase, uppercase, etc)
+- `plugin install palettero` (gives acces to a customisable command palette)
+
+Also useful via [Neko-Box-Coder's unofficial plugin channel](https://github.com/Neko-Box-Coder/unofficial-plugin-channel):
+- [MicroOmni](https://github.com/Neko-Box-Coder/MicroOmni) (useful navigation shortcuts, copy current file path & more)
 
 ### Link to your micro config dynamically from markdown
 

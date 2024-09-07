@@ -32,7 +32,7 @@ Broadly tojour likes a [Github-style Markdown](https://github.github.com/gfm/) s
 
 ### Ultra-rapid crashcourse
 
-If you'd rather get stuck right in than go through the [tutorial](MICRO_CONFIG_DIR/plug/tojour/tojour.tutorial.md), here's a very tiny run-through of some of tojour's main hotkeys that can should get you productive. 
+If you'd rather get stuck right in than go through the [tutorial](MICRO_CONFIG_DIR/plug/tojour/tojour.tutorial.md), here's a very tiny run-through of some of tojour's main hotkeys that can should get you productive if you run the `Ctrl-e` command: `tojour.setupbindings` or `tojour.setupbindingsforce` to take over the recommended tojour bindings.
 
 Open any md file in micro, then try the following, in order and observe what happens: press `Alt-d` (confirming creation of a new file with 'y'), type 'Hello World!', hit `Alt-c` to create todo item, `Alt-u` to see undones, `Alt-z` to snooze, `Alt-c` again to mark it done, type 'Title 1', `Alt-1`, hit Enter, type 'Title 2', `Alt-2`, then `Alt-o` to see headings, `Alt-q`, and move to a heading with the cursor and press `Alt-f` to follow that heading.
 
@@ -59,10 +59,14 @@ That's a good chunk of it! If you're interested in more in-depth tutorial of adv
 - *Helpful side-panes* that show your undone todos `Alt-u` in relation to the current file, cross referenced tags `Alt-i` and a navigable table of content with wordcounts `Alt-o` of your current document.
 - *Markdown goodies* like configurable line comments `Ctrl-/`, advanced markdown syntax highlighting, header and indentation aware block selections `Alt-m`, advanced file management with nnn.
 
+## Plugin-specific commands
+
+* `tojour.setupbindings`: Set up tojour's recommended opinionated hotkeys (without clobbering existing config)
+
+* `tojour.setupbindingsforce`: Force setting tojour's basic opinionated hotkeys (potentially overwriting some of your existing shortcuts, though it will make a backup of your bindings.json)
+  
 ## Plugin-specific options
 
-* `tojour.setupbindings`: Force setting tojour's basic opinionated hotkeys (potentially overwriting some of your existing shortcuts, though it will make a backup of your bindings.json)
-  
 * `tojour.imageviewer`: will use this executable to open embedded markdown image links, ending in .png, .webp, .jpg, etc. Just use the name of an executable without a path, that can be run from the command line. Examples: `feh`, `nsxiv`, `nomacs`, `gimp`, `viu`. If empty, will use `xdg-open` to call default associated app.
 
     default value: `` 
@@ -120,7 +124,15 @@ This should make it all work On Ubuntu and other Debian-derived, Arch-like syste
 
 ### Manual installation
 
-Copy this repository to ~/.config/micro/plugs/tojour and then install the plugin with `micro -plugin install tojour`
+Copy this repository to ~/.config/micro/plugs/tojour or add this to your [MICRO_CONFIG_DIR/settings.json] file:
+
+```json
+"pluginrepos": [
+    "https://raw.githubusercontent.com/protostork/micro-tojour/main/repo.json"
+]
+```
+
+Then install the plugin with `micro -plugin install tojour`
 
 #### Dependencies
 
@@ -143,7 +155,7 @@ If someone can get it to work, please do post an issue and/or a pull request for
 
 ## Default tojour keybindings
 
-You can force restore these any time (and make a backup of your old bindings, in case any hotkeys clash), with the micro `Ctrl-e` command `tojour.setupbinding`.
+You can force restore these any time (and make a backup of your old bindings, in case any hotkeys clash), with the micro `Ctrl-e` command `tojour.setupbindingforce`.
 
 - "Alt-,": "PreviousTab",
 - "Alt--": "lua:tojour.cmdSidepaneResizeDown",
