@@ -1,0 +1,163 @@
+filetype: markdown
+
+# To disable standard markdown, the only thing that seems to work is this:
+# mv ~/.config/micro/syntax/markdown.yaml ~/.config/micro/syntax/markdown.bak
+detect:
+  filename: "\\.(md|livemd|mkd|mkdn|markdown|nwd)$"
+
+rules:
+    # Tables (Github extension)
+    - type: ".*[ :]\\|[ :].*"
+
+      # quotes
+    # - statement:  "^>.*"
+    - constant:  "^[[:space:]]*>[[:space:]]*.+$" 
+
+      # Emphasis
+    - type: "(^|[[:space:]])(_[^ ][^_]*_|\\*[^ ][^*]*\\*)"
+
+      # Strong emphasis
+    - type: "(^|[[:space:]])(__[^ ][^_]*__|\\*\\*[^ ][^*]*\\*\\*)"
+
+      # strike-through
+    - type: "(^|[[:space:]])~~[^ ~][^~]*[^ ~]~~"
+
+      # horizontal rules
+    - special: "^(---+|===+|___+|\\*\\*\\*+)\\s*$"
+
+
+    # headlines - (statement is yellow bg in neon!)
+    # new colourful headlines
+    - type.h1:  "^[[:space:]]*#{1,6}[[:space:]].*"
+    - type.h2:  "^[[:space:]]*#{2}[[:space:]].*"
+    - type.h3:  "^[[:space:]]*#{3}[[:space:]].*"
+    - type.h4:  "^[[:space:]]*#{4}[[:space:]].*"
+    - type.h5:  "^[[:space:]]*#{5}[[:space:]].*"
+    - type.h6:  "^[[:space:]]*#{6}[[:space:]].*"
+    # 
+    # - statement:  "^[[:space:]]*#{2,6}.*"
+    # - preproc:  "^[[:space:]]*#{3,6}.*"
+
+
+    # Date and Time of day
+    - underlined:  "[[:digit:]]{2}:[[:digit:]]{2}"
+    - underlined:  "[[:digit:]]{4}-[[:digit:]]{2}-[[:digit:]]{2}"
+    # - identifier:  "[[:digit:]]{2}:[[:digit:]]{2}"
+    # this was 'comment', but added type date in colour scheme for this, so it's not quite so dark:
+    # color-link date "#82867E"
+
+    # orgmode style TODO and DONE, alternative to checkboxes
+    - preproc.highlight:   "^[ \t*-]*TODO"
+    - comment:   "^[ \t*-]*DONE.*$"
+
+      # lists
+    - identifier:   "^[[:space:]]*[\\*+-] |^[[:space:]]*[0-9]+\\. "
+
+      # misc
+    - preproc:   "(\\(([CcRr]|[Tt][Mm])\\)|\\.{3}|(^|[[:space:]])\\-\\-($|[[:space:]]))"
+    
+    # urls
+    - underlined: "https?://[^ )>]+"
+    
+      # links
+    - comment: "\\[([^][]|\\[[^]]*\\])*\\]\\([^)]+\\)"
+    - constant: "\\[[^\\]]+\\]"
+    
+    # Double [[tagged]]
+    - special: "\\[\\[[^\\]]+\\]\\]"
+    
+    # hashtagged #tags (maybe consider underlined)
+    # - special: "#[a-zA-Z0-9\\._-]+?[a-zA-Z0-9]"
+    # - special: "#[^ #0-9:\\)]+"
+    # - preproc: "#tomorrow"
+    # - statement: "#[^ ]+"
+    # - underlined: "#[^ #0-9:\\)]+"
+    
+    # @free category etc tags on first line
+    - comment:   "^@.*$"
+
+    - type: "@[^ :\\)\\.]+\\b"
+    - error: "@today"
+    - underlined: "@habit"
+    
+    # +context +subcategories like this
+    - constant: "\\+[^ :\\)\\.]+\\b"
+
+      # images
+    - underlined: "!\\[[^][]*\\](\\([^)]+\\)|\\[[^]]+\\])"
+
+    - special: "`.*?`"
+
+    # - special:
+    #     start: "```"
+    #     end: "```"
+    #     rules: 
+    #       - special: ".*"
+
+    - constant:
+        start: "```<script.*?>"
+        end: "</script>```"
+        rules:
+            - include: "javascript"
+    - underlined:
+        start: "```<style.*?>"
+        end: "</style>```"
+        rules:
+          - include: "css"
+    - constant:
+        start: "```(javascript|js)"
+        end: "```"
+        rules:
+            - include: "javascript"
+    - constant:
+        start: "```python"
+        end: "```"
+        rules:
+            - include: "python"
+    - constant:
+        start: "```lua"
+        end: "```"
+        rules:
+            - include: "lua"
+    - constant:
+        start: "```golang"
+        end: "```"
+        rules:
+            - include: "golang"
+    - constant:
+        start: "```php"
+        end: "```"
+        rules:
+            - include: "php"
+    - constant:
+        start: "```(shell|sh)"
+        end: "```"
+        rules:
+            - include: "sh"
+    - constant:
+        start: "```(zsh|bash)"
+        end: "```"
+        rules:
+            - include: "zsh"
+    - constant:
+        start: "```(dot)"
+        end: "```"
+        rules:
+            - include: "dot"
+
+    # checkboxes
+    - constant:   "^[[:space:]]*-[[:space:]]\\[[[:space:]]\\]"
+    # Done checkbox
+    - comment:   "^[[:space:]]*-[[:space:]]\\[x\\].*$"
+    
+    # HTML / markdown comment
+    - comment:   "<!--.*?-->"
+    # lines starting with %
+    - comment:   "^%.*$"
+    # Markdown hack style comments like [comment]: this is a comment
+    - comment:   "^\\s*\\[[^]]*\\]:.*$" # This includes leading space potentially
+    # - comment:   "^\\[[^]]*\\]:.*$"
+    
+    # highlight hashtags even within comments
+    # - special: "#[a-zA-Z0-9\\._-]+"
+    - special: "#[a-zA-Z0-9\\._-]+[a-zA-Z0-9]"

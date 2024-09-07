@@ -1,0 +1,15 @@
+[{
+  "Name": "tojour",
+  "Description": "Low-overhead daily journalling, todo and habit tracking IDE in micro",
+  "Website": "https://github.com/protostork/micro-tojour",
+  "Tags": ["journal", "todo", "tojour", "orgmode"],
+  "Versions": [
+    {
+      "Version": "1.0.0",
+      "Url": "",
+      "Require": {
+        "micro": ">=2.0.0"
+      }
+    }
+  ]
+}]
