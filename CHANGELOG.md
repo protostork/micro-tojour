@@ -1,5 +1,10 @@
 # Changelog
 
+## 2024-09-09 v.1.0.3
+
+- fix: regression that broke checkbox and date line operations from sidepane 
+- feature: collectUndones now adds any overdue dates found at the very top 
+
 ## 2024-09-09 v.1.0.2
 
 - performance: optional caching of tags in a project's .micro/cache directory, useful on Android Termux and with `tojour.potatomode` (configurable with `tojour.cache` and `tojour.cache_dir` options)
