@@ -102,15 +102,16 @@ do
     if [[ $line == *@* ]]; then
         if [[ $line == *@habit* ]]; then
             addline "Habits" "$line"
-        elif [[ $line =~ @today|$todayDay|$todayDate ]]; then
+        elif [[ $line =~ @today|@$todayDay|@$todayDate ]]; then
             addline "Due today" "$line"
-        elif [[ $line =~ @tomorrow|$tomorrowDay|$tomorrowDate ]]; then
+        elif [[ $line =~ @tomorrow|@$tomorrowDay|@$tomorrowDate ]]; then
             addline "Due tomorrow" "$line"
-        elif [[ $line =~ $day2|$date2 ]]; then
+        elif [[ $line =~ @$day2|@$date2 ]]; then
             addline "Day after tomorrow" "$line"
         else
-            if [[ "$line" =~ [0-9]{4}-[0-9]{2}-[0-9]{2} ]]; then
-                extracted_date="${BASH_REMATCH[0]}"
+            if [[ "$line" =~ @[0-9]{4}-[0-9]{2}-[0-9]{2} ]]; then
+                # remove @ from the matched datestring
+                extracted_date="${BASH_REMATCH[0]//@/}"
                 if [[ $today_date_unixtime -gt $(date -d "$extracted_date" +%s) ]]; then
                     addline "Overdue!" "$line"
                 else
