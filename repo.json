@@ -5,8 +5,8 @@
   "Tags": ["journal", "todo", "tojour", "orgmode"],
   "Versions": [
     {
-      "Version": "1.0.1",
-      "Url": "https://github.com/protostork/micro-tojour/releases/download/v1.0.1/tojour-1.0.1.zip",
+      "Version": "1.0.2",
+      "Url": "https://github.com/protostork/micro-tojour/releases/download/v1.0.2/tojour-1.0.2.zip",
       "Require": {
         "micro": ">=2.0.0"
       }
