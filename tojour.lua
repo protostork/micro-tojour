@@ -237,15 +237,18 @@ function cmdTOCDecrement(bp)
 end
 
 function cmdIncrementDaystring(bp)
-	Common.cmdIncrementDaystring(bp)
+	-- Common.cmdIncrementDaystring(bp)
+	Common.incrementPrefixedDateInLine(bp, 1)
 end
 
 function cmdDecrementDaystring(bp)
-	Common.cmdDecrementDaystring(bp)
+	-- Common.cmdDecrementDaystring(bp)
+	Common.incrementPrefixedDateInLine(bp, -1)
 end
 
 function cmdIncrementDaystringByWeek(bp)
-	Common.cmdIncrementDaystringByWeek(bp)
+	-- Common.cmdIncrementDaystringByWeek(bp)
+	Common.incrementPrefixedDateInLine(bp, 7)
 end
 
 --
@@ -542,89 +545,7 @@ function cmdFollowInternalLink(bp)
 		return false
 	end
 
-	local function jumptoLineMatchInPrimaryPanel()
-		local panes = TJPanes:new()
-		-- if we're in a TOC table of contents file or Undones file sidepane
-		local cursor = micro.CurPane().Cursor
-		local localbuffer = micro.CurPane().Buf
-		local line = localbuffer:Line(cursor.Y)
-		-- parse internal menu 'button' from createContextHeading
-		-- if strStartswithStrict(line, FILE_META_MENU_START) then
-		if Common.strStartswithStrict(line, TJConfig.FILE_META_HEADER_BEGIN) then
-			Common.devlog("Special contextHeader 'menu' block detected")
-			local link = Common.getLinkTagsUnderCursor(bp)
-			if link == "++" then
-				return cmdTOCIncrement(bp)
-			elseif link == "--" then
-				return cmdTOCDecrement(bp)
-			elseif link then
-				TJPanes:openSidePaneWithContext(string.lower(link))
-				return true
-			end
-		end
-
-		-- remove line numbers from TOC at the end
-		line = string.gsub(line, "[%s]*[0-9]*$", "")
-		-- remove TOC '>' cursor from beginning of line
-		line = string.gsub(line, "^%>", "")
-		-- strip out the space in the first column added by generateTOC or indents to space things more nicely
-		line = string.gsub(line, "^[ \t]*", "")
-		-- looks for <via: [link] > strings produced by collectUndonesFromFile, when ref is to a todo in another file
-		if Common.strEndsswith(line, "%<via: %[.*%] %>") then
-			local link = string.gsub(line, "^.*%<via: %[(.*)%] %>$", "%1")
-			if link then
-				FileLink:openInternalDocumentLink(bp, link)
-				return true
-			end
-		end
-
-		-- in the index view, we don't want to do more advanced sidepane jumps
-		-- but just to follow normal links
-		if Common.isPanenameMetapane(micro.CurPane().Buf.Path, TJConfig.FILE_META_SUFFIXES.index) then
-			return false
-		end
-
-		-- get the left pane and search it
-		-- local panes = TJPanes:new()
-		firstpaneName = panes:getLeftPaneFilename()
-		-- local linenumber = FileLink:getLinenumMatchingTextInFile(firstpaneName, line, false)
-		local cp = panes.panesArray[1]
-		cp.Buf.LastSearchRegex = false
-		cp.Buf.LastSearch = line
-		Common.devlog("Did text-find for: " .. line)
-		-- alas Findnext just seems to always return a true bool, so hard to react if nothing found (could figure out with terrible pane logic instead)
-		if cp:FindNext() then
-			TJConfig.DEBOUNCE_GET_TOC = false
-			TJConfig.DEBOUNCE_GET_SIDEPANE = false
-			return true
-		end
-		TJConfig.DEBOUNCE_GET_TOC = false
-		TJConfig.DEBOUNCE_GET_SIDEPANE = false
-		micro.InfoBar():Message("Couldn't find line '" .. line .. "' in left pane...")
-		return false
-		-- TODO: else find a ## [[tagname]] in a line above, and try finding the line in that file?
-	end
-
-	-- if we're in a META sidepane like toc, undone
-	-- then try searching for special <via tags, commands or matching lines in left pane
-	local curpaneName = micro.CurPane().Buf.Path
-	for i, meta in pairs(TJConfig.FILE_META_SUFFIXES) do
-		-- if isPanenameMetapane(curpaneName, FILE_META_SUFFIXES.toc) or isPanenameMetapane(curpaneName, FILE_META_SUFFIXES.undone) then
-		if Common.isPanenameMetapane(curpaneName, meta) then
-			if jumptoLineMatchInPrimaryPanel() then
-				Common.devlog("jumping to line match in primary pane")
-				return true
-			end
-		end
-	end
-
-	word = Common.getLinkTagsUnderCursor(bp)
-	if word ~= nil and word ~= "" then
-		if FileLink:openInternalDocumentLink(bp, word) then
-			return true
-		end
-	end
-	return false
+	TJPanes:followInternalLink(bp)
 end
 
 function cmdOpenTodayFile(bp)

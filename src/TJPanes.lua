@@ -536,4 +536,103 @@ function TJPanes.createContextHeading(heading, context_type)
 	return TJConfig.FILE_META_HEADER_BEGIN .. heading .. "\n" .. pane_menu .. "\n\n"
 end
 
+--
+-- Grab word under cursor and follow it in new window if it's a link
+-- focus_which can be nil or can start at 0, to select left pane, and 1 to select second
+--
+function TJPanes:followInternalLink(bp, focus_which)
+	if not Common.isMarkdown() then
+		return false
+	end
+
+	local function jumpFromLineMatchInSidepane()
+		local panes = TJPanes:new()
+		-- if we're in a TOC table of contents file or Undones file sidepane
+		local cursor = micro.CurPane().Cursor
+		local localbuffer = micro.CurPane().Buf
+		local line = localbuffer:Line(cursor.Y)
+		-- parse internal menu 'button' from createContextHeading
+		if Common.strStartswithStrict(line, TJConfig.FILE_META_HEADER_BEGIN) then
+			Common.devlog("Special contextHeader 'menu' block detected")
+			local link = Common.getLinkTagsUnderCursor(bp)
+			if link == "++" then
+				return cmdTOCIncrement(bp)
+			elseif link == "--" then
+				return cmdTOCDecrement(bp)
+			elseif link then
+				TJPanes:openSidePaneWithContext(string.lower(link))
+				return true
+			end
+		end
+
+		-- remove line numbers from TOC at the end
+		line = string.gsub(line, "[%s]*[0-9]*$", "")
+		-- remove TOC '>' cursor from beginning of line
+		line = string.gsub(line, "^%>", "")
+		-- strip out the space in the first column added by generateTOC or indents to space things more nicely
+		line = string.gsub(line, "^[ \t]*", "")
+		-- looks for <via: [link] > strings produced by collectUndonesFromFile, when ref is to a todo in another file
+		if Common.strEndsswith(line, "%<via: %[.*%] %>") then
+			local link = string.gsub(line, "^.*%<via: %[(.*)%] %>$", "%1")
+			if link then
+				Common.devlog("Opening <via: link from sidepane")
+				FileLink:openInternalDocumentLink(bp, link)
+				return true
+			end
+		end
+
+		-- in the index view, we don't want to do more advanced sidepane jumps (yet) taking actions
+		-- but just to follow normal links (since format is different: line before containts header)
+		if Common.isPanenameMetapane(micro.CurPane().Buf.Path, TJConfig.FILE_META_SUFFIXES.index) then
+			return false
+		end
+
+		-- get the left pane and search it
+		-- local panes = TJPanes:new()
+		-- local firstpaneName = panes:getLeftPaneFilename()
+		-- local linenumber = FileLink:getLinenumMatchingTextInFile(firstpaneName, line, false)
+		local cp = panes.panesArray[1]
+		cp.Buf.LastSearchRegex = false
+		cp.Buf.LastSearch = line
+		-- alas Findnext just seems to always return a true bool, so hard to react if nothing is found (could figure out with terrible pane logic instead)
+		if cp:FindNext() then
+			Common.devlog("Searched for line in mainpane: " .. line)
+			TJConfig.DEBOUNCE_GET_TOC = false
+			TJConfig.DEBOUNCE_GET_SIDEPANE = false
+			if focus_which ~= nil then
+				Common.devlog("explicitly told to focus pane number: " .. tostring(focus_which))
+				local curtab = micro.CurTab()
+				curtab:SetActive(tonumber(focus_which))
+			end
+			return true
+		end
+		TJConfig.DEBOUNCE_GET_TOC = false
+		TJConfig.DEBOUNCE_GET_SIDEPANE = false
+		micro.InfoBar():Message("Couldn't find line '" .. line .. "' in left pane...")
+		return false
+		-- TODO: else find a ## [[tagname]] in a line above, and try finding the line in that file?
+	end
+
+	-- if we're in a META sidepane like toc, undone
+	-- then try searching for special <via tags, commands or matching lines in left pane
+	local curpaneName = micro.CurPane().Buf.Path
+	for i, meta in pairs(TJConfig.FILE_META_SUFFIXES) do
+		-- if isPanenameMetapane(curpaneName, FILE_META_SUFFIXES.toc) or isPanenameMetapane(curpaneName, FILE_META_SUFFIXES.undone) then
+		if Common.isPanenameMetapane(curpaneName, meta) then
+			if jumpFromLineMatchInSidepane() then
+				Common.devlog("jumping to line match in primary pane via text-search or other options")
+				return true
+			end
+		end
+	end
+
+	word = Common.getLinkTagsUnderCursor(bp)
+	if word ~= nil and word ~= "" then
+		if FileLink:openInternalDocumentLink(bp, word) then
+			return true
+		end
+	end
+	return false
+end
+
 return TJPanes

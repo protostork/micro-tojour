@@ -464,7 +464,7 @@ function Common.cmdToggleCheckbox(bp)
 
 	if TJPanes.curpaneId > 1 then
 		-- if we're in the second pane, toggle the checkbox in the first pane
-		cmdFollowInternalLink(bp)
+		TJPanes:followInternalLink(bp, 0)
 		bp = micro.CurPane()
 	end
 
@@ -512,11 +512,11 @@ function Common.incrementPrefixedDateInLine(bp, n)
 	local human_readable_date = ""
 	local days_diff_from_today = 0
 
-	TJPanes:new()
+	local panes = TJPanes:new()
 
-	if TJPanes.curpaneId > 1 then
+	if panes.curpaneId > 1 then
 		-- if we're in the second pane, jump to correct place in first pane and carry out action
-		cmdFollowInternalLink(bp)
+		TJPanes:followInternalLink(bp, 0)
 		bp = micro.CurPane()
 	end
 
