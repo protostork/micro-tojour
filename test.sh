@@ -21,6 +21,7 @@ rsync -q -av --delete "$PLUG_DIR/tojour.tutorial.md" "$TEST_INSTALL_DIR/" &&
 rsync -q -av --delete "$PLUG_DIR/README.md" "$TEST_INSTALL_DIR/" &&
 rsync -q -av --delete "$PLUG_DIR"/help/* "$TEST_INSTALL_DIR/help/" &&
 rsync -q -av --delete "$PLUG_DIR"/scripts/*.{py,sh} "$TEST_INSTALL_DIR/scripts/" &&
+rsync -q -av --delete "$PLUG_DIR"/src/*.lua "$TEST_INSTALL_DIR/src/" &&
 rsync -q -av --delete "$PLUG_DIR"/syntax/*.yaml "$TEST_INSTALL_DIR/syntax/" &&
 rsync -q -av --delete "$PLUG_DIR"/colorschemes/*.micro "$TEST_INSTALL_DIR/colorschemes/" &&
 echo 'Copied to repo' || echo "Some error copying to repo"

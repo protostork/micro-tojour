@@ -59,7 +59,7 @@ fi
 --bind 'tab:down' \
 --bind 'shift-tab:up' \
 --bind 'ctrl-g:first' \
---bind "ctrl-x:execute(clear; rm -i \"\$(echo {} | sed 's#^[0-9\.|]\+ ##g')\";)+reload-sync(echo -n \"$prepend_lines_with_tabs\"; find . -not -path '*/.*' -type f -printf '%T@ %p\n' | grep -E -v \"$prepend_lines_regex\" | sort -k1,1r )" \
+--bind "ctrl-x:execute(clear; rm -i \"\$(echo {} | sed 's#^[0-9\.\| ]\+ ##g')\";)+reload-sync(echo -n \"$prepend_lines_with_tabs\"; find . -not -path '*/.*' -type f -printf '%T@ %p\n' | grep -E -v \"$prepend_lines_regex\" | sort -k1,1r )" \
 --bind "ctrl-y:execute(echo {} | sed 's#^[0-9\.| ]\+ ##g' | xclip -sel clip && notify-send 'Copied to clipboard')" \
 --bind "ctrl-s:reload(find . -not -path '*/.*' -type f -printf '%p\n' | sort | sed 's#^#000 #g')" \
 --bind "ctrl-d:reload(echo -n \"$prepend_lines_with_tabs\"; find . -not -path '*/.*' -type f -printf '%T@ %p\n' | grep -E -v \"$prepend_lines_regex\" | sort -k1,1r)" \

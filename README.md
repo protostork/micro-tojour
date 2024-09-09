@@ -94,21 +94,29 @@ Please note: Here Be Dragons. Don't mess with these or the other many undocument
 * `tojour.potatomode`: Disables many of the real-time sidepane updates and auto-completes that may be quite slow on slower Raspberry Pis or older Android / Termux phones (you can still update the sidepane when you save)
 
 	default value: `false`
+	
+* `tojour.cache`: Enables caching (useful with potato mode, speeds up searching for existing tags, at present)
 
-* `tojour.symbolsforjump`: takes a regular expression to describe what you would like `Alt-[` and `Alt-]` to skip between (next and previous markdown headers by default)
+	default value: `false`
+
+* `tojour.cache_dir`: Where in the current project's working directory tojour should store its cache files
+
+	default value: `.micro/.cache`
+
+* `tojour.symbolsforjump`: Takes a regular expression to describe what you would like `Alt-[` and `Alt-]` to skip between (next and previous markdown headers by default)
 
     default value: `^*#{1,6} .+`
 
-* `tojour.symbolsforjump`: more granular jumping with `Alt-{` and `Alt-}` to skip to an alternative set of symbols by regex. By default this jumps to the next #hashtag,[[category]] or [link]
+* `tojour.symbolsforjump`: More granular jumping with `Alt-{` and `Alt-}` to skip to an alternative set of symbols by regex. By default this jumps to the next #hashtag,[[category]] or [link]
 
     default value: `"#[A-Za-z0-9\\.$~/_-]+[A-Za-z0-9]|\\[\\[?[a-zA-Z0-9\\.$~/_\\s-]+[A-Za-z0-9]\\]?\\]|\\[[+-]{2}]"`
 
-* `tojour.buildscript`: an external build or script to invoke manually by hotkey (`Alt-b` by default), or automatically when starting a new today file (if enabled). `todobuddy.py` does some cool stuff under the hood to make tojour's daily files and todo management work, but you can write your own or add actions you want taken like committing your journals to git before running it, uploading them somewhere, etc. Make sure you replace " .. helper_script_path .. " with an absolute location to a file, if you are changing the config.
+* `tojour.buildscript`: An external build or script to invoke manually by hotkey (`Alt-b` by default), or automatically when starting a new today file (if enabled). `todobuddy.py` does some cool stuff under the hood to make tojour's daily files and todo management work, but you can write your own or add actions you want taken like committing your journals to git before running it, uploading them somewhere, etc. Make sure you replace " .. helper_script_path .. " with an absolute location to a file, if you are changing the config.
 
 	default value: `{ command -v git > /dev/null; } && git rev-parse 2> /dev/null && { cd $(git rev-parse --show-toplevel) && git add . && git commit -m 'pre-build autocommit' ; }; python " .. helper_script_path .. "/todobuddy.py --today --write;`
 	alternative value: `python ~/.config/micro/plug/tojour/scripts/todobuddy.py --today --write`
 
-* `tojour.autobuildtoday`: automatically call the build script defined in `journal.autobuildtoday` when opening a new empty today file via the ctrl-p hotkey. Examples: can be used to do an automatic git commit regularly, rsync backups or syncs, run some seds and awks, or with todobuddy.py to automatically populate a new today file with yesterday's undone items or habits and to process tags, or to add boilerplate text to a new today file.
+* `tojour.autobuildtoday`: Automatically call the build script defined in `journal.autobuildtoday` when opening a new empty today file via the ctrl-p hotkey. Examples: can be used to do an automatic git commit regularly, rsync backups or syncs, run some seds and awks, or with todobuddy.py to automatically populate a new today file with yesterday's undone items or habits and to process tags, or to add boilerplate text to a new today file.
 
     default value: `true`
     
@@ -120,7 +128,7 @@ Download this repository and run `install.sh`, then follow instructions to semi-
 
 `cd /tmp && git clone https://github.com/protostork/micro-tojour && cd micro-tojour && bash ./install.sh`
 
-This should make it all work On Ubuntu and other Debian-derived, Arch-like systems and Android's Termux, this should be all you need to do.
+This should make it all work on Ubuntu and other Debian-derived, Arch-like systems and Android's Termux. This should be all you need to do.
 
 ### Manual installation
 
@@ -155,63 +163,68 @@ If someone can get it to work, please do post an issue and/or a pull request for
 
 ## Default tojour keybindings
 
-You can force restore these any time (and make a backup of your old bindings, in case any hotkeys clash), with the micro `Ctrl-e` command `tojour.setupbindingforce`.
+You can force restore these any time (and make a backup of your old bindings, in case any hotkeys clash), with the micro `Ctrl-e` command `tojour.setupbindingforce`, or just individually copy them to your [MICRO_CONFIG_DIR/bindings.json] file.
 
-- "Alt-,": "PreviousTab",
-- "Alt--": "lua:tojour.cmdSidepaneResizeDown",
-- "Alt-.": "NextTab",
-- "Alt-1": "lua:tojour.cmdInsertHeader1",
-- "Alt-2": "lua:tojour.cmdInsertHeader2",
-- "Alt-3": "lua:tojour.cmdInsertHeader3",
-- "Alt-4": "lua:tojour.cmdInsertHeader4",
-- "Alt-5": "lua:tojour.cmdInsertHeader5",
-- "Alt-6": "lua:tojour.cmdInsertHeader6",
-- "Alt-=": "lua:tojour.cmdSidepaneResizeUp",
-- "Alt-CtrlH": "WordLeft",
-- "Alt-CtrlL": "WordRight",
-- "Alt-Ctrlj": "MoveLinesDown",
-- "Alt-Ctrlk": "MoveLinesUp",
-- "Alt-D": "lua:tojour.cmdBrowseDateJournals",
-- "Alt-H": "SelectLeft",
-- "Alt-J": "SelectDown",
-- "Alt-K": "SelectUp",
-- "Alt-L": "SelectRight",
-- "Alt-MouseLeft": "MousePress,lua:tojour.cmdHandleMouseEvent",
-- "Alt-O": "lua:tojour.cmdTOCDecrement",
-- "Alt-T": "lua:tojour.cmdInsertDateTimestamp",
-- "Alt-W": "lua:tojour.cmdResetGlobalWordcounts",
-- "Alt-Z": "lua:tojour.cmdDecrementDaystring",
-- "Alt-[": "lua:tojour.cmdJumpToPrevSymbol",
-- "Alt-]": "lua:tojour.cmdJumpToNextSymbol",
-- "Alt-a": "lua:tojour.cmdJumpToTag",
-- "Alt-b": "lua:tojour.cmdRunBuildScript",
-- "Alt-c": "lua:tojour.cmdToggleCheckbox",
-- "Alt-d": "lua:tojour.cmdOpenTodayFile",
-- "Alt-e": "lua:tojour.cmdRunFilebrowser",
-- "Alt-f": "lua:tojour.cmdFollowInternalLink",
-- "Alt-h": "CursorLeft",
-- "Alt-i": "lua:tojour.cmdToggleSidePaneIndex",
-- "Alt-j": "CursorDown",
-- "Alt-k": "CursorUp",
-- "Alt-l": "CursorRight",
-- "Alt-m": "lua:tojour.cmdSelectBlock",
-- "Alt-o": "lua:tojour.cmdToggleSidePaneTOC",
-- "Alt-q": "NextSplit",
-- "Alt-Q": "lua:tojour.cmdCloseSidePane",
-- "Alt-t": "lua:tojour.cmdInsertTimestamp",
-- "Alt-u": "lua:tojour.cmdToggleSidePaneUndone",
-- "Alt-w": "lua:tojour.cmdWordcount",
-- "Alt-z": "lua:tojour.cmdIncrementDaystring",
-- "Alt-{": "lua:tojour.cmdJumpToPrevAltSymbol",
-- "Alt-}": "lua:tojour.cmdJumpToNextAltSymbol",
-- "Ctrl-Alt-F": "lua:tojour.cmdFindTextInAllFiles",
-- "Ctrl-Alt-z": "lua:tojour.cmdIncrementDaystringByWeek",
-- "Ctrl-o": "lua:tojour.cmdJumpToSymbols",
-- "Ctrl-p": "lua:tojour.cmdBrowseOpenTabsAndJournals",
-- "Ctrl-v": "lua:tojour.cmdSmarterPaste",
-- "CtrlUnderscore": "lua:tojour.cmdInsertLineComment|lua:comment.comment",
-- "MouseRight": "MousePress,lua:tojour.cmdHandleMouseEvent",
-- "Tab": "IndentSelection|lua:tojour.cmdPressTabAnywhereToIndent|Autocomplete"
+### General tools
+"Alt-o": "lua:tojour.cmdToggleSidePaneTOC",
+"Alt-O": "lua:tojour.cmdTOCDecrement",
+"Alt-u": "lua:tojour.cmdToggleSidePaneUndone",
+"Alt-i": "lua:tojour.cmdToggleSidePaneIndex",
+"Alt-w": "lua:tojour.cmdWordcount",
+"Alt-W": "lua:tojour.cmdResetGlobalWordcounts",
+"Alt-e": "lua:tojour.cmdRunFilebrowser",
+"Ctrl-Alt-F": "lua:tojour.cmdFindTextInAllFiles",
+
+### Navigation
+"Alt-d": "lua:tojour.cmdOpenTodayFile",
+"Alt-D": "lua:tojour.cmdBrowseDateJournals",
+"Alt-b": "lua:tojour.cmdRunBuildScript",
+"Ctrl-p": "lua:tojour.cmdBrowseOpenTabsAndJournals",
+"Alt-a": "lua:tojour.cmdJumpToTag",
+"Ctrl-o": "lua:tojour.cmdJumpToSymbols",
+"Alt-[": "lua:tojour.cmdJumpToPrevSymbol",
+"Alt-]": "lua:tojour.cmdJumpToNextSymbol",
+"Alt-{": "lua:tojour.cmdJumpToPrevAltSymbol",
+"Alt-}": "lua:tojour.cmdJumpToNextAltSymbol",
+"Alt-f": "lua:tojour.cmdFollowInternalLink",
+"Alt-MouseLeft": "MousePress,lua:tojour.cmdHandleMouseEvent",
+"MouseRight": "MousePress,lua:tojour.cmdHandleMouseEvent",
+"Alt-q": "NextSplit",
+"Alt-Q": "lua:tojour.cmdCloseSidePane",
+"Alt--": "lua:tojour.cmdSidepaneResizeDown",
+"Alt-=": "lua:tojour.cmdSidepaneResizeUp",
+"Alt-,": "PreviousTab",
+"Alt-.": "NextTab",
+
+### Line & Block editing
+"Alt-c": "lua:tojour.cmdToggleCheckbox",
+"Alt-z": "lua:tojour.cmdIncrementDaystring",
+"Alt-Z": "lua:tojour.cmdDecrementDaystring",
+"Ctrl-Alt-z": "lua:tojour.cmdIncrementDaystringByWeek",
+"Alt-t": "lua:tojour.cmdInsertTimestamp",
+"Alt-T": "lua:tojour.cmdInsertDateTimestamp",
+"Alt-1": "lua:tojour.cmdInsertHeader1",
+"Alt-2": "lua:tojour.cmdInsertHeader2",
+"Alt-3": "lua:tojour.cmdInsertHeader3",
+"Alt-4": "lua:tojour.cmdInsertHeader4",
+"Alt-5": "lua:tojour.cmdInsertHeader5",
+"Alt-6": "lua:tojour.cmdInsertHeader6",
+"CtrlUnderscore": "lua:tojour.cmdInsertLineComment|lua:comment.comment",
+"Alt-m": "lua:tojour.cmdSelectBlock",
+"Tab": "IndentSelection|lua:tojour.cmdPressTabAnywhereToIndent|Autocomplete"
+"Alt-h": "CursorLeft",
+"Alt-j": "CursorDown",
+"Alt-k": "CursorUp",
+"Alt-l": "CursorRight",
+"Alt-H": "SelectLeft",
+"Alt-J": "SelectDown",
+"Alt-K": "SelectUp",
+"Alt-L": "SelectRight",
+"Alt-CtrlH": "WordLeft",
+"Alt-CtrlL": "WordRight",
+"Alt-Ctrlj": "MoveLinesDown",
+"Alt-Ctrlk": "MoveLinesUp",
+"Ctrl-v": "lua:tojour.cmdSmarterPaste",
 
 # Contributing
 
