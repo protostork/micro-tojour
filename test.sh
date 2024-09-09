@@ -11,30 +11,29 @@ readonly ARGS="$@"
 cd "$PROGDIR"
 source "$PROGDIR/scripts/common.lib.sh"
 
-TEST_INSTALL_DIR="/tmp/micro-tojour-test-installation-deleteme/"
+TEST_INSTALL_DIR="/tmp/micro-tojour-test-installation-deleteme"
+rm -rf "$TEST_INSTALL_DIR" > /dev/null
+mkdir -p "$TEST_INSTALL_DIR" > /dev/null
 PLUG_DIR="$PROGDIR"
 
-rsync -q -av --delete "$PLUG_DIR/tojour.lua" "$TEST_INSTALL_DIR/" &&
-rsync -q -av --delete "$PLUG_DIR/install.sh" "$TEST_INSTALL_DIR/" &&
-rsync -q -av --delete "$PLUG_DIR/repo.json" "$TEST_INSTALL_DIR/" &&
-rsync -q -av --delete "$PLUG_DIR/tojour.tutorial.md" "$TEST_INSTALL_DIR/" &&
-rsync -q -av --delete "$PLUG_DIR/README.md" "$TEST_INSTALL_DIR/" &&
-rsync -q -av --delete "$PLUG_DIR"/help/* "$TEST_INSTALL_DIR/help/" &&
-rsync -q -av --delete "$PLUG_DIR"/scripts/*.{py,sh} "$TEST_INSTALL_DIR/scripts/" &&
-rsync -q -av --delete "$PLUG_DIR"/src/*.lua "$TEST_INSTALL_DIR/src/" &&
-rsync -q -av --delete "$PLUG_DIR"/syntax/*.yaml "$TEST_INSTALL_DIR/syntax/" &&
-rsync -q -av --delete "$PLUG_DIR"/colorschemes/*.micro "$TEST_INSTALL_DIR/colorschemes/" &&
-echo 'Copied to repo' || echo "Some error copying to repo"
+# Only copy files that are in git
+for gitfile in $(git ls-files); do
+  mkdir -p "$(realpath --relative-to=. "$(dirname "$TEST_INSTALL_DIR/$gitfile")")" > /dev/null
+  cp "$gitfile" "$TEST_INSTALL_DIR/$gitfile"
+done
+# tree -a "$TEST_INSTALL_DIR"
 
 cd "$TEST_INSTALL_DIR"
-TEST_CONFIG_DIR="/tmp/micro-tojour-test-config-deleteme"
+CONFIG_DEPLOY_DIR="/tmp/micro-tojour-test-deploy-deleteme"
 
-rm -rf "/tmp/micro-tojour-test-old-deleteme/" || :
-mv "$TEST_CONFIG_DIR" "/tmp/micro-tojour-test-old-deleteme/" || :
+# Make backup of old config
+rm -rf "/tmp/micro-tojour-test-old-deleteme/" > /dev/null || :
+mv "$CONFIG_DEPLOY_DIR" "/tmp/micro-tojour-test-old-deleteme/" > /dev/null || :
+journalDir="$CONFIG_DEPLOY_DIR/plug/tojour/journals"
 
-./install.sh --config-dir "$TEST_CONFIG_DIR" --journal-dir "$TEST_CONFIG_DIR/plug/tojour/journals"
+./install.sh --config-dir "$CONFIG_DEPLOY_DIR" --journal-dir "$journalDir"
 
-TOJOUR_DEVMODE=true "$TEST_CONFIG_DIR/tojour" "$TEST_CONFIG_DIR/tojour.tutorial.md" || Die "Error in installing test instance"
+TOJOUR_DEVMODE=true "$CONFIG_DEPLOY_DIR/tojour" "$CONFIG_DEPLOY_DIR/tojour.tutorial.md" || Die "Error in installing test instance"
 if [[ -f "/tmp/micro-tojour-test-result.log" ]]; then
     notify-send "$(cat "/tmp/micro-tojour-test-result.log")"
     echo "$(cat "/tmp/micro-tojour-test-result.log")"
@@ -43,5 +42,3 @@ if [[ -f "/tmp/micro-tojour-test-result.log" ]]; then
 else 
     echo "All tests passed"
 fi
-
-rm -rf "$TEST_INSTALL_DIR"
