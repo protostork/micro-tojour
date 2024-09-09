@@ -8,8 +8,6 @@ function Help(){
     Die
 }
 
-# sleep 0.5
-
 FILTER_BY_TAG=
 FILE_TO_PARSE=
 while [ -n "$1" ]
@@ -98,6 +96,7 @@ function addline() {
 "
 }
 
+today_date_unixtime=$(date +%s)
 while IFS= read -r line
 do
     if [[ $line == *@* ]]; then
@@ -110,13 +109,21 @@ do
         elif [[ $line =~ $day2|$date2 ]]; then
             addline "Day after tomorrow" "$line"
         else
-            addline "Other dated items" "$line"
+            if [[ "$line" =~ [0-9]{4}-[0-9]{2}-[0-9]{2} ]]; then
+                extracted_date="${BASH_REMATCH[0]}"
+                if [[ $today_date_unixtime -gt $(date -d "$extracted_date" +%s) ]]; then
+                    addline "Overdue!" "$line"
+                else
+                    addline "Other dated items" "$line"
+                fi
+            fi
         fi
     else
         addline "Undated items" "$line"
     fi
 done <<< "$ALL_TODO_ITEMS"
 
+echo -n "${todos["Overdue!"]}" | sort -t@ -k2 # sort from lowest to highest, in order of first @numerical-datestring at least
 echo -n "${todos["Habits"]}"
 echo -n "${todos["Due today"]}"
 echo -n "${todos["Due tomorrow"]}"
