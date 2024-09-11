@@ -132,7 +132,10 @@ This should make it all work on Ubuntu and other Debian-derived, Arch-like syste
 
 ### Manual installation
 
-Copy this repository to ~/.config/micro/plugs/tojour or add this to your [MICRO_CONFIG_DIR/settings.json] file:
+1. Either:
+
+- Clone this repository to ~/.config/micro/plugs/tojour, 
+- or add this to your [MICRO_CONFIG_DIR/settings.json] file:
 
 ```json
 "pluginrepos": [
@@ -140,7 +143,17 @@ Copy this repository to ~/.config/micro/plugs/tojour or add this to your [MICRO_
 ]
 ```
 
-Then install the plugin with `micro -plugin install tojour`
+- or add the [unofficial-plugin-channel](https://github.com/Neko-Box-Coder/unofficial-plugin-channel):
+
+```json
+"pluginchannels": [
+    "https://raw.githubusercontent.com/Neko-Box-Coder/unofficial-plugin-channel/main/channel.json"
+]
+```
+
+2. Install the plugin by starting micro with `micro -plugin install tojour` (or starting micro, pressing `Ctrl-e` and typing `plugin install tojour`.
+
+3. [Copy or modify the hotkeys](#default-tojour-keybindings) you need to your [MICRO_CONFIG_DIR/bindings.json] file (or enter the micro command `tojour.setupbindings`), and open any markdown file in micro.
 
 #### Dependencies
 
