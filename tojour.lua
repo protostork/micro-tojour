@@ -1,4 +1,4 @@
-VERSION = "1.0.3"
+VERSION = "1.0.4"
 --
 -- Copyright (c) 2024, released under MIT licence
 --

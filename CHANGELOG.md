@@ -1,5 +1,11 @@
 # Changelog
 
+## 2024-09-11 v.1.0.4
+
+- fix: refactor regressed TOC increment functions out into new SidepaneContent
+- fix: collectUndones now only parses dates prefaced with hardcoded '@'
+- testing: refactors test.sh to create instance only from files in git  
+
 ## 2024-09-09 v.1.0.3
 
 - fix: regression that broke checkbox and date line operations from sidepane 
