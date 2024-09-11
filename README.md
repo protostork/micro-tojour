@@ -2,7 +2,7 @@
 
 [Tojour](https://github.com/protostork/micro-tojour/) is a daily journalling and self-organisation plugin for the [micro](https://micro-editor.github.io/) text editor. 
 
-Tojour aims to be a fast and low-friction way to keep a daily digital bullet-like journal, manage todo lists, track habits and write short, medium and long-form content and documentation, seamlessly across one (or thousands) of portable markdown files, with low mental (and CPU) overheads. 
+Tojour aims to be a fast and low-friction way to keep a daily digital [bullet-like journal](https://en.wikipedia.org/wiki/Bullet_journal), manage todo lists, track habits and write short, medium and long-form content and documentation, seamlessly across one (or thousands) of portable markdown files, with low mental (and CPU) overheads. 
 
 Think of it as a super-fast and slightly smart digital diary for people who like using the keyboard. If you're a coder, you might like to think of it as a baby IDE for your markdown files, or a lightly-opinionated and simple-minded Emacs Orgmode for people who think Markdown is beautiful and that getting organised should be uncomplicated.
 
@@ -81,7 +81,7 @@ That's a good chunk of it! If you're interested in more in-depth tutorial of adv
 
 ### Expert plugin options
 
-Please note: Here Be Dragons. Don't mess with these or the other many undocumented options unless you broadly know what you're doing. Some of these may break things and even cause data loss if you're too adventurous and experimental (see [disclaimer](#licence-disclaimer) below).  
+Please note: Here Be Dragons. Don't mess with these or the other many undocumented options unless you broadly know what you're doing. Some of these may break things and even cause data loss if you're too adventurous and experimental (see [disclaimer](#licence--disclaimer) below).  
 
 * `tojour.alwaysopencontextpane`: Specify true or 'toc', 'index' or 'undone' to automatically open that kind of sidepane when opening a markdown file for the first time
 
@@ -166,6 +166,7 @@ If someone can get it to work, please do post an issue and/or a pull request for
 You can force restore these any time (and make a backup of your old bindings, in case any hotkeys clash), with the micro `Ctrl-e` command `tojour.setupbindingforce`, or just individually copy them to your [MICRO_CONFIG_DIR/bindings.json] file.
 
 ### General tools
+```
 "Alt-o": "lua:tojour.cmdToggleSidePaneTOC",
 "Alt-O": "lua:tojour.cmdTOCDecrement",
 "Alt-u": "lua:tojour.cmdToggleSidePaneUndone",
@@ -174,8 +175,10 @@ You can force restore these any time (and make a backup of your old bindings, in
 "Alt-W": "lua:tojour.cmdResetGlobalWordcounts",
 "Alt-e": "lua:tojour.cmdRunFilebrowser",
 "Ctrl-Alt-F": "lua:tojour.cmdFindTextInAllFiles",
+```
 
 ### Navigation
+```
 "Alt-d": "lua:tojour.cmdOpenTodayFile",
 "Alt-D": "lua:tojour.cmdBrowseDateJournals",
 "Alt-b": "lua:tojour.cmdRunBuildScript",
@@ -195,8 +198,10 @@ You can force restore these any time (and make a backup of your old bindings, in
 "Alt-=": "lua:tojour.cmdSidepaneResizeUp",
 "Alt-,": "PreviousTab",
 "Alt-.": "NextTab",
+```
 
 ### Line & Block editing
+```
 "Alt-c": "lua:tojour.cmdToggleCheckbox",
 "Alt-z": "lua:tojour.cmdIncrementDaystring",
 "Alt-Z": "lua:tojour.cmdDecrementDaystring",
@@ -225,6 +230,7 @@ You can force restore these any time (and make a backup of your old bindings, in
 "Alt-Ctrlj": "MoveLinesDown",
 "Alt-Ctrlk": "MoveLinesUp",
 "Ctrl-v": "lua:tojour.cmdSmarterPaste",
+```
 
 # Contributing
 
@@ -310,4 +316,3 @@ If there's interest, there may be some ways to speed things up more for small de
 ### Why the name tojour?
 
 Tojour is an un/happy mashup of the words *todo* and the French words *jour* (meaning day) and *toujours* (meaning always).
-
